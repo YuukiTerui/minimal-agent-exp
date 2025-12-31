@@ -8,7 +8,7 @@ export type Plan = {
   tasks: Task[];
 }
 
-export type Evaluate = {
+export type Evaluation = {
   score: number;
   problems: string[];
   retry: boolean;
