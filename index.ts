@@ -1,1 +1,3 @@
-console.log("Hello via Bun!");
+import { runAgent } from "./src/agent";
+
+runAgent();

@@ -3,7 +3,7 @@ import { executor } from "./executor";
 import { planner } from "./planner";
 import { createInitialAgentState } from "./state";
 
-const runAgent = async () => {
+export const runAgent = async () => {
   let state = createInitialAgentState("summarize the article");
 
   while (!state.done) {
@@ -34,5 +34,3 @@ const runAgent = async () => {
   console.log("DONE", state.artifacts);
 
 }
-
-runAgent();
