@@ -13,7 +13,7 @@ export const executor = async (task: Task, state: AgentState): Promise<AgentStat
 
 タスクを実行し、結果をテキストのみで出力してください。
 `;
-    const response = await getLLMClient("openai").generate(prompt);
+    const response = await getLLMClient("openai").generate(prompt, true);
     state.artifacts.lastResponse = response.text;
     console.log(`[Executor] Generated: ${response.text}`);
   }

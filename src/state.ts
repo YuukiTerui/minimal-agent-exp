@@ -10,11 +10,11 @@ export type AgentState = {
     done: boolean;
 }
 
-export const createInitialAgentState = (goal: string): AgentState => ({
+export const createInitialAgentState = (goal: string, targetArticle: string): AgentState => ({
     goal,
     tasks: [],
     currentTaskIndex: 0,
-    artifacts: {},
+    artifacts: { targetArticle },
     issues: [],
     done: false,
 })
