@@ -1,4 +1,3 @@
-import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
 
 type JsonSchemaPayload = {
@@ -12,29 +11,7 @@ export type LLMResponse = {
 };
 
 export type LLMClient = {
-  generate: (prompt: string, jsonMode?: boolean, jsonSchema?: JsonSchemaPayload) => Promise<LLMResponse>;
-};
-
-// Google Gemini Client
-export const createGeminiClient = (modelName: string = "gemini-2.0-flash"): LLMClient => {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not set");
-  }
-
-  const client = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-  });
-
-  return {
-    generate: async (prompt: string, jsonMode: boolean = false) => {
-      const response = await client.models.generateContent({
-        model: modelName,
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        config: jsonMode ? { responseMimeType: "application/json" } : undefined,
-      });
-      return { text: response.text ?? "" };
-    },
-  };
+  generate: (prompt: string, jsonSchema: JsonSchemaPayload) => Promise<LLMResponse>;
 };
 
 // OpenAI Client
@@ -42,20 +19,11 @@ export const createOpenAIClient = (modelName: string = "google/gemma-3n-e4b"): L
   console.log(process.env.OPENAI_BASE_URL);
   const openai = new OpenAI({ baseURL: process.env.OPENAI_BASE_URL, apiKey: "not-needed" });
   return {
-    generate: async (prompt: string, jsonMode: boolean = false, jsonSchema?: JsonSchemaPayload) => {
-      const getResponseFormat = (): OpenAI.Chat.Completions.ChatCompletionCreateParams['response_format'] => {
-        if (jsonSchema) {
-          return { type: "json_schema", json_schema: jsonSchema };
-        }
-        if (jsonMode) {
-          return { type: "json_object" };
-        }
-        return { type: "text" };
-      };
+    generate: async (prompt: string, jsonSchema: JsonSchemaPayload) => {
       const response = await openai.chat.completions.create({
         model: modelName,
         messages: [{ role: "user", content: prompt }],
-        response_format: getResponseFormat(),
+        response_format: { type: "json_schema", json_schema: jsonSchema },
       });
       return { text: response.choices[0]?.message?.content || "" };
     },
@@ -63,11 +31,9 @@ export const createOpenAIClient = (modelName: string = "google/gemma-3n-e4b"): L
 };
 
 
-type LLMClientType = "gemini" | "openai";
-export const getLLMClient = (clientType: LLMClientType = "gemini"): LLMClient => {
-  if (clientType === "gemini") {
-    return createGeminiClient();
-  } else if (clientType === "openai") {
+type LLMClientType = "openai";
+export const getLLMClient = (clientType: LLMClientType = "openai"): LLMClient => {
+  if (clientType === "openai") {
     return createOpenAIClient();
   } else {
     throw new Error(`Invalid client type: ${clientType}`);
