@@ -10,14 +10,16 @@ export const runAgent = async () => {
   while (!state.done) {
 
     if (state.tasks.length === 0) {
-      console.log("[Agent] Planning...", state);
+      console.log("[Agent] Planning...");
       const plan = await planner(state);
       console.log("[Agent] Planned", plan);
       state.tasks = plan.tasks;
     }
 
-    console.log("[Agent] Executing...", state);
+    console.log(state.tasks, state.currentTaskIndex);
+
     const task = state.tasks[state.currentTaskIndex];
+    console.log("[Agent] Executing...", task);
     if (!task) {
       state.done = true;
     } else {
@@ -39,6 +41,7 @@ export const runAgent = async () => {
     }
   }
 
+  
   console.log("DONE", state.artifacts);
 
 }
