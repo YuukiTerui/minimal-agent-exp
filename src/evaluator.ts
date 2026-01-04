@@ -2,7 +2,6 @@ import { getLLMClient } from "./llm";
 import type { AgentState } from "./state";
 import type { Evaluation } from "./types";
 
-
 export const evaluator = async (state: AgentState): Promise<Evaluation> => {
   const prompt = `
 あなたは厳しい品質評価者です。
@@ -19,23 +18,27 @@ ${JSON.stringify(state.artifacts)}
 - 精度、質に問題はないか
 - 不足している要素はないか
 
-## 出力フォーマット
-JSON形式で以下の項目を出力してください。
-- score: 0-100の数値
-- problems: 問題点や改善が必要な点のリスト（文字列の配列）
-- retry: 再試行が必要な場合は true、完了とする場合は false
-
-{
-  "score": number,
-  "problems": string[],
-  "retry": boolean
-}
 `;
 
-  const response = await getLLMClient("openai").generate(prompt, true);
+const evaluationSchema = {
+  name: "evaluation_schema",
+  schema: {
+    type: "object",
+    properties: {
+      score: { type: "number" },
+      problems: { type: "array", items: { type: "string" } },
+      retry: { type: "boolean" }
+    },
+    required: ["score", "problems", "retry"]
+  }
+};
+
+console.log(prompt);
+
+  const response = await getLLMClient("openai").generate(prompt, evaluationSchema);
   const text = response.text;
 
-  console.log(`[Evaluator] Generated: ${text}`);
+  console.log(`[Evaluator] Evaluated: ${text}`);
 
   try {
     return JSON.parse(text) as Evaluation;

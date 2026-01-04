@@ -10,10 +10,19 @@ export const executor = async (task: Task, state: AgentState): Promise<AgentStat
 タスク内容: ${task.description}
 現在の成果物: ${JSON.stringify(state.artifacts)}
 過去の課題: ${state.issues.join(", ")}
-
-タスクを実行し、結果をテキストのみで出力してください。
 `;
-    const response = await getLLMClient("openai").generate(prompt, true);
+const executorSchema = {
+  name: "executor",
+  schema: {
+    type: "object",
+    properties: {
+      text: { type: "string" }
+    },
+    required: ["text"]
+  }
+};
+
+    const response = await getLLMClient("openai").generate(prompt, executorSchema);
     state.artifacts.lastResponse = response.text;
     console.log(`[Executor] Generated: ${response.text}`);
   }

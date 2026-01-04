@@ -34,21 +34,17 @@ ${state.goal}
 
 ## 現在の状況
 - 過去の課題: ${state.issues.join(", ") || "なし"}
-- 対象記事: ${state.artifacts.targetArticle}
+- 対象記事: ${state.artifacts.targetArticleUrl}
 
 ## 制約事項
-- 出力はJSON形式で行ってください。
-- タスクの tool は "generate" または "evaluate" のいずれか、あるいは tool が不要な場合は null にしてください。
 - 簡潔で実行可能な最小限のステップを提案してください。
 `;
 
-  const response = await getLLMClient().generate(prompt, true, planSchema);
+  const response = await getLLMClient().generate(prompt, planSchema);
   const text = response.text;
-
-  console.log(`[Planner] Generated tasks: ${response.text}`);
   
   try {
-    return {tasks: JSON.parse(text)} as Plan;
+    return JSON.parse(text) as Plan;
   } catch (e) {
     console.error("Failed to parse planner response:", text);
     throw e;
