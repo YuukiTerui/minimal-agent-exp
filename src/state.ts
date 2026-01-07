@@ -13,7 +13,7 @@ export type AgentState = {
         }
     }
     artifacts: {
-        articleSummary?: ArticleSummary;
+        summary?: ArticleSummary;
     }
     issues: string[];
     done: boolean;

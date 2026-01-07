@@ -23,7 +23,7 @@ export type ArticleSummary = {
     url?: string;
   }
   gist: {
-    onSentence: string;
+    oneSentence: string;
     abstract: string;
     keywords: string[];
   }

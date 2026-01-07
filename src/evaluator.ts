@@ -1,53 +1,28 @@
-import { getLLMClient } from "./llm";
-import type { AgentState } from "./state";
-import type { Evaluation } from "./types";
+import type { AgentState } from "./state"
+import type { Evaluation } from "./types"
 
-export const evaluator = async (state: AgentState): Promise<Evaluation> => {
-  const prompt = `
-あなたは厳しい品質評価者です。
-エージェントの最終目標に対して、現在の成果物が十分に達成されているか評価してください。
+export const evaluator = async (
+  state: AgentState
+): Promise<Evaluation> => {
+  const problems: string[] = []
+  const summary = state.artifacts.summary
 
-## 最終目標
-${state.goal}
-
-## 現在の成果物
-${JSON.stringify(state.artifacts)}
-
-## 評価基準
-- 目標を完全に達成しているか
-- 精度、質に問題はないか
-- 不足している要素はないか
-
-`;
-
-const evaluationSchema = {
-  name: "evaluation_schema",
-  schema: {
-    type: "object",
-    properties: {
-      score: { type: "number" },
-      problems: { type: "array", items: { type: "string" } },
-      retry: { type: "boolean" }
-    },
-    required: ["score", "problems", "retry"]
+  if (!summary) {
+    problems.push("要約が存在しない")
+  } else {
+    if (summary.points.claims.length === 0) {
+      problems.push("主張が抽出されていない")
+    }
+    if (summary.gist.oneSentence.length > 120) {
+      problems.push("一文要約が長すぎる")
+    }
   }
-};
 
-console.log(prompt);
+  const score = problems.length === 0 ? 0.9 : 0.4
 
-  const response = await getLLMClient("openai").generate(prompt, evaluationSchema);
-  const text = response.text;
-
-  console.log(`[Evaluator] Evaluated: ${text}`);
-
-  try {
-    return JSON.parse(text) as Evaluation;
-  } catch (e) {
-    console.error("Failed to parse evaluator response:", text);
-    return {
-      score: 0,
-      problems: ["Failed to parse evaluation output"],
-      retry: true
-    };
+  return {
+    score,
+    problems,
+    retry: score < 0.8,
   }
 }
