@@ -14,6 +14,16 @@ export type Evaluation = {
   retry: boolean;
 }
 
+export type EvalationResult = {
+  score: number;
+  problems: {
+    type: "missing" | "unclear" | "hallucination" | "structure";
+    field: string; // e.g. "points.evidences"
+    description: string;
+  }[];
+  suggestions: string[]; // log用
+}
+
 export type ArticleSummary = {
   meta: {
     title: string;
