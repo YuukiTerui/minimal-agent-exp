@@ -13,3 +13,34 @@ export type Evaluation = {
   problems: string[];
   retry: boolean;
 }
+
+export type ArticleSummary = {
+  meta: {
+    title: string;
+    source?: string;
+    author?: string;
+    publishedAt?: string;
+    url?: string;
+  }
+  gist: {
+    onSentence: string;
+    abstract: string;
+    keywords: string[];
+  }
+  points: {
+    claims: string[]
+    evidences: string[]
+    conclusions: string[]
+  }
+  structure: {
+    sections: {
+      heading: string
+      summary: string
+    }[]
+  }
+  tags: string[]
+  qualityHints?: {
+    unclearPoints: string[]
+    missingInfo: string[]
+  }
+}
