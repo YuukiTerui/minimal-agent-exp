@@ -1,4 +1,3 @@
-import { getLLMClient } from "./llm";
 import type { AgentState } from "./state";
 import type { Plan } from "./types";
 
@@ -25,28 +24,18 @@ const planSchema = {
 };
 
 export const planner = async (state: AgentState): Promise<Plan> => {
-  const prompt = `
-あなたは優秀なプランナーです。
-以下の「最終目標」と「対象記事」を確認し、次に行うべきタスクリストを作成してください。
-
-## 最終目標
-${state.goal}
-
-## 現在の状況
-- 過去の課題: ${state.issues.join(", ") || "なし"}
-- 対象記事: ${state.artifacts.targetArticleUrl}
-
-## 制約事項
-- 簡潔で実行可能な最小限のステップを提案してください。
-`;
-
-  const response = await getLLMClient().generate(prompt, planSchema);
-  const text = response.text;
-  
-  try {
-    return JSON.parse(text) as Plan;
-  } catch (e) {
-    console.error("Failed to parse planner response:", text);
-    throw e;
+  return {
+    tasks: [
+      {
+        id: "summarize-article",
+        description: "対象記事を構造化して要約する。",
+        tool: "summarize",
+      },
+      {
+        id: "evaluate-summary",
+        description: "要約の品質を評価する。",
+        tool: "evaluate",
+      }
+    ],
   }
 }

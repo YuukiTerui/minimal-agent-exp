@@ -1,7 +1,7 @@
 export type Task = {
     id: string;
     description: string;
-    tool: "generate" | "evaluate" | null;
+    tool: "summarize" | "evaluate" | null;
 }
 
 export type Plan = {
