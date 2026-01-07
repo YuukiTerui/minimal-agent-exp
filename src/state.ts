@@ -1,4 +1,4 @@
-import type { ArticleSummary, Task } from "./types";
+import type { ArticleSummary, EvaluationResult, Task } from "./types";
 
 
 export type AgentState = {
@@ -15,7 +15,9 @@ export type AgentState = {
     artifacts: {
         summary?: ArticleSummary;
     }
+    evaluation?: EvaluationResult;
     issues: string[];
+    iteration: number;
     done: boolean;
 }
 
@@ -23,7 +25,11 @@ export const createInitialAgentState = (goal: string): AgentState => ({
     goal,
     tasks: [],
     currentTaskIndex: 0,
+    input: {
+        articleUrl: new URL("https://zenn.dev/fitness_densuke/articles/2026-01-01-react-hooks-fundamental"),
+    },
     artifacts: {},
     issues: [],
+    iteration: 0,
     done: false,
 })

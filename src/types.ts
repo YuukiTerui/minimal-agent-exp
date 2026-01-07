@@ -2,26 +2,19 @@ export type Task = {
     id: string;
     description: string;
     tool: "summarize" | "evaluate" | null;
+    constraints?: string[];
 }
 
-export type Plan = {
-  tasks: Task[];
-}
 
-export type Evaluation = {
-  score: number;
-  problems: string[];
-  retry: boolean;
+export type EvaluationProblem = {
+  type: "missing" | "unclear" | "hallucination" | "structure";
+  field: string; // e.g. "points.evidences"
+  description: string;
 }
 
 export type EvaluationResult = {
   score: number;
-  problems: {
-    type: "missing" | "unclear" | "hallucination" | "structure";
-    field: string; // e.g. "points.evidences"
-    description: string;
-  }[];
-  suggestions: string[]; // log用
+  problems: EvaluationProblem[];
 }
 
 export type ArticleSummary = {

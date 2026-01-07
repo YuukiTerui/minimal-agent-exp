@@ -1,50 +1,31 @@
+// runAgent.ts
 import { evaluator } from "./evaluator";
 import { executor } from "./executor";
 import { planner } from "./planner";
-import { createInitialAgentState } from "./state";
+import type { AgentState } from "./state";
+import type { Task } from "./types";
 
-export const runAgent = async () => {
-  const targetArticle = new URL("https://zenn.dev/fitness_densuke/articles/2026-01-01-react-hooks-fundamental");
-  let state = createInitialAgentState("記事を知識として要約する");
-  state.input = {
-    articleUrl: targetArticle,
+export async function runAgent(
+  initialTask: Task,
+  initialState: AgentState,
+  maxIterations = 3
+): Promise<AgentState> {
+  let task: Task | null = initialTask;
+  let state = initialState;
+
+  console.log("[Agent] Starting agent");
+
+  while (task && state.iteration < maxIterations) {
+    console.log("[Agent] Current task", task);
+    console.log("[Agent] Current state", state);
+    state = await executor(task, state);
+
+    const evaluation = await evaluator(state);
+    state.evaluation = evaluation;
+
+    task = planner(task, state, evaluation);
+    state.iteration += 1;
   }
 
-  while (!state.done) {
-
-    if (state.tasks.length === 0) {
-      console.log("[Agent] Planning...");
-      const plan = await planner(state);
-      console.log("[Agent] Planned", plan);
-      state.tasks = plan.tasks;
-    }
-
-    console.log(state.tasks, state.currentTaskIndex);
-
-    const task = state.tasks[state.currentTaskIndex];
-    console.log("[Agent] Executing...", task);
-    if (!task) {
-      state.done = true;
-    } else {
-      state = await executor(task, state)
-    }
-    state.currentTaskIndex++;
-
-    if (state.currentTaskIndex >= state.tasks.length) {
-      console.log("[Agent] Evaluating...", state);
-      const evaluation = await evaluator(state)
-      console.log("[Agent] Evaluated", evaluation);
-      if (evaluation.retry) {
-        state.issues.push(...evaluation.problems)
-        state.tasks = []
-        state.currentTaskIndex = 0
-      } else {
-        state.done = true
-      }
-    }
-  }
-
-  
-  console.log("DONE", state.artifacts.summary);
-
+  return state;
 }

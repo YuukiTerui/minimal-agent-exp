@@ -1,5 +1,5 @@
 import type { AgentState } from "./state";
-import type { Plan } from "./types";
+import type { EvaluationResult, Task } from "./types";
 
 const planSchema = {
   name: "plan_schema",
@@ -23,19 +23,37 @@ const planSchema = {
   },
 };
 
-export const planner = async (state: AgentState): Promise<Plan> => {
-  return {
-    tasks: [
-      {
-        id: "summarize-article",
-        description: "対象記事を構造化して要約する。",
-        tool: "summarize",
-      },
-      {
-        id: "evaluate-summary",
-        description: "要約の品質を評価する。",
-        tool: "evaluate",
-      }
-    ],
+export const planner = (prevTask: Task, state: AgentState, evaluation: EvaluationResult): Task | null => {
+const needsRevision =
+    evaluation.score < 80 || evaluation.problems.length > 0;
+
+  if (!needsRevision) {
+    return null; // 終了
   }
+
+  const constraints = buildRevisionConstraints(evaluation.problems);
+
+  return {
+    id: "summarize-article",
+    tool: "summarize",
+    description: "評価結果を反映した再要約",
+    constraints
+  };
+}
+
+function buildRevisionConstraints(
+  problems: EvaluationResult["problems"]
+): string[] {
+  return problems.map((p: EvaluationResult["problems"][number]) => {
+    switch (p.type) {
+      case "missing":
+        return `「${p.field}」が欠落しています。必ず補完してください。`;
+      case "unclear":
+        return `「${p.field}」が曖昧です。より具体的に記述してください。`;
+      case "hallucination":
+        return `「${p.field}」に事実でない内容があります。記事本文に基づいて修正してください。`;
+      case "structure":
+        return `「${p.field}」の構造が不正です。Schemaに厳密に従って再生成してください。`;
+    }
+  });
 }

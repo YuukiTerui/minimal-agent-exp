@@ -27,6 +27,9 @@ ${state.issues.join("\n") || "なし"}
 - 自然文での説明は禁止
 - 出力は JSON のみ
 - 情報が不足している場合は qualityHints に記載
+
+# 修正制約（必ず従うこと）
+${task.constraints?.map(c => `- ${c}`).join("\n") || "なし"}
 `;
 
   const summarySchema = {

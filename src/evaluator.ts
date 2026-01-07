@@ -1,20 +1,32 @@
 import type { AgentState } from "./state"
-import type { Evaluation } from "./types"
+import type { EvaluationProblem, EvaluationResult } from "./types"
 
 export const evaluator = async (
   state: AgentState
-): Promise<Evaluation> => {
-  const problems: string[] = []
+): Promise<EvaluationResult> => {
+  const problems: EvaluationProblem[] = []
   const summary = state.artifacts.summary
 
   if (!summary) {
-    problems.push("要約が存在しない")
+    problems.push({
+      type: "missing",
+      field: "summary",
+      description: "要約が存在しない"
+    })
   } else {
     if (summary.points.claims.length === 0) {
-      problems.push("主張が抽出されていない")
+      problems.push({
+        type: "missing",
+        field: "summary.points.claims",
+        description: "主張が抽出されていない"
+      })
     }
     if (summary.gist.oneSentence.length > 120) {
-      problems.push("一文要約が長すぎる")
+      problems.push({
+        type: "unclear",
+        field: "summary.gist.oneSentence",
+        description: "一文要約が長すぎる"
+      })
     }
   }
 
@@ -23,6 +35,5 @@ export const evaluator = async (
   return {
     score,
     problems,
-    retry: score < 0.8,
   }
 }
