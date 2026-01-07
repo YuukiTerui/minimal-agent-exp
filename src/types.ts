@@ -14,7 +14,7 @@ export type Evaluation = {
   retry: boolean;
 }
 
-export type EvalationResult = {
+export type EvaluationResult = {
   score: number;
   problems: {
     type: "missing" | "unclear" | "hallucination" | "structure";
