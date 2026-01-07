@@ -11,7 +11,7 @@ export type LLMResponse = {
 };
 
 export type LLMClient = {
-  generate: (prompt: string, jsonSchema: JsonSchemaPayload) => Promise<LLMResponse>;
+  generate: <T>(prompt: string, jsonSchema: JsonSchemaPayload) => Promise<T>;
 };
 
 // OpenAI Client
@@ -19,13 +19,14 @@ export const createOpenAIClient = (modelName: string = "google/gemma-3n-e4b"): L
   console.log(process.env.OPENAI_BASE_URL);
   const openai = new OpenAI({ baseURL: process.env.OPENAI_BASE_URL, apiKey: "not-needed" });
   return {
-    generate: async (prompt: string, jsonSchema: JsonSchemaPayload) => {
+    generate: async <T>(prompt: string, jsonSchema: JsonSchemaPayload) => {
       const response = await openai.chat.completions.create({
         model: modelName,
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_schema", json_schema: jsonSchema },
       });
-      return { text: response.choices[0]?.message?.content || "" };
+      const content = response.choices[0]?.message?.content || "{}";
+      return JSON.parse(content) as T;
     },
   };
 };

@@ -6,7 +6,7 @@ export type AgentState = {
     tasks: Task[];
     currentTaskIndex: number;
     input?: {
-        articleText: string;
+        articleUrl: URL;
         meta?: {
             title?: string;
             source?: string;

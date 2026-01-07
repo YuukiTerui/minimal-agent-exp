@@ -4,8 +4,11 @@ import { planner } from "./planner";
 import { createInitialAgentState } from "./state";
 
 export const runAgent = async () => {
-  const targetArticle = "https://zenn.dev/fitness_densuke/articles/2026-01-01-react-hooks-fundamental";
-  let state = createInitialAgentState("summarize the article", targetArticle);
+  const targetArticle = new URL("https://zenn.dev/fitness_densuke/articles/2026-01-01-react-hooks-fundamental");
+  let state = createInitialAgentState("記事を知識として要約する");
+  state.input = {
+    articleUrl: targetArticle,
+  }
 
   while (!state.done) {
 
@@ -42,6 +45,6 @@ export const runAgent = async () => {
   }
 
   
-  console.log("DONE", state.artifacts);
+  console.log("DONE", state.artifacts.summary);
 
 }
